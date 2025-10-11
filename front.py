@@ -61,7 +61,7 @@ if st.button("Run Model"):
     from sklearn.model_selection import train_test_split
     X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.2, random_state=42)
 
-    # Logistic Regression
+    # ================= Logistic Regression =================
     if model_choice == "Logistic Regression":
         from sklearn.linear_model import LogisticRegression
         from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
@@ -75,10 +75,16 @@ if st.button("Run Model"):
         cm = confusion_matrix(y_test, y_pred)
 
         st.success(f"Accuracy: {acc:.2f} | ROC-AUC: {auc:.2f}")
-        st.write("Confusion Matrix:")
-        st.write(cm)
 
-    # Random Forest
+        # Confusion matrix heatmap
+        st.markdown("### Confusion Matrix")
+        fig, ax = plt.subplots()
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, ax=ax)
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("Actual")
+        st.pyplot(fig)
+
+    # ================= Random Forest =================
     elif model_choice == "Random Forest":
         from sklearn.ensemble import RandomForestClassifier
         from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
@@ -92,17 +98,23 @@ if st.button("Run Model"):
         cm = confusion_matrix(y_test, y_pred)
 
         st.success(f"Accuracy: {acc:.2f} | ROC-AUC: {auc:.2f}")
-        st.write("Confusion Matrix:")
-        st.write(cm)
 
-        # Feature importance plot
+        # Confusion matrix heatmap
+        st.markdown("### Confusion Matrix")
+        fig, ax = plt.subplots()
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, ax=ax)
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("Actual")
+        st.pyplot(fig)
+
+        # Feature importance
         importances = model.feature_importances_
         feature_names = numdata + list(model.feature_names_in_[-len(catdata):])
         fi_df = pd.DataFrame({"Feature": feature_names, "Importance": importances}).sort_values(by="Importance", ascending=False)
         st.markdown("### Feature Importance")
         st.bar_chart(fi_df.set_index("Feature"))
 
-    # ANN
+    # ================= ANN =================
     elif model_choice == "ANN":
         from sklearn.neural_network import MLPClassifier
         from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
@@ -117,12 +129,18 @@ if st.button("Run Model"):
         cm = confusion_matrix(y_test, y_pred)
 
         st.success(f"Accuracy: {acc:.2f} | ROC-AUC: {auc:.2f}")
-        st.write("Confusion Matrix:")
-        st.write(cm)
+
+        # Confusion matrix heatmap
+        st.markdown("### Confusion Matrix")
+        fig, ax = plt.subplots()
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, ax=ax)
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("Actual")
+        st.pyplot(fig)
 
     st.markdown("---")
 
-    # Optional: Top correlated features display
+    # Top correlated features display
     corr = compute_correlation(X_processed, y)
     top_features = top_correlated_features(corr)
     st.markdown("### 🔝 Top Correlated Features with Target")
