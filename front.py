@@ -20,7 +20,7 @@ model_choice = st.sidebar.selectbox(
     ["Logistic Regression", "Random Forest", "ANN"]
 )
 
-# Hyperparameter sliders (example)
+# Hyperparameter sliders
 if model_choice == "Random Forest":
     n_estimators = st.sidebar.slider("Number of Trees", 10, 200, 50, step=10)
     max_depth = st.sidebar.slider("Max Depth", 1, 20, 5)
@@ -28,8 +28,8 @@ elif model_choice == "ANN":
     epochs = st.sidebar.slider("Number of Epochs", 10, 200, 50, step=10)
     learning_rate = st.sidebar.slider("Learning Rate", 0.001, 0.1, 0.01, step=0.001)
 
+# Display data
 st.markdown("## 📄 Dataset Overview")
-st.markdown("This dashboard uses the Churn Modeling dataset, containing customer features like Age, Geography, CreditScore, etc., and the target column `Exited` indicating churn.")
 st.dataframe(df.head())
 
 with st.expander("ℹ️ Preprocessing Details"):
