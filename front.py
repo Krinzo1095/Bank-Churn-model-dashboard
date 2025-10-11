@@ -4,149 +4,85 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from back import load_data, clean_and_impute_data, encode_and_scale, compute_correlation, top_correlated_features
 
-# Load and clean data
+# =================== LOAD DATA ===================
 df = load_data()
 clean_and_impute_data(df)
 
-st.sidebar.markdown("# 🗂️ Model Controls")
+# =================== SIDEBAR ===================
+st.sidebar.markdown("# Churn Modeling Dashboard")
 st.sidebar.markdown("""
-This dashboard uses the Churn Modeling dataset.  
-Adjust the model and hyperparameters below to see how the predictions and performance metrics change.
+This dashboard uses the **Churn Modeling dataset**.  
+It applies **Logistic Regression** to predict customer churn (`Exited`).  
+
+**Dataset Features**:
+- CreditScore, Age, Tenure, Balance, NumOfProducts, HasCrCard, IsActiveMember, EstimatedSalary  
+- Categorical: Geography, Gender  
+- Target: Exited (0 = Stayed, 1 = Churned)  
+
+**Instructions**:  
+1. Inspect the dataset below.  
+2. Press **Run Logistic Regression** to train the model and see performance metrics and plots.
 """)
 
-# Model selection
-model_choice = st.sidebar.selectbox(
-    "Select ML Model",
-    ["Logistic Regression", "Random Forest", "ANN"]
-)
-
-# Hyperparameter sliders
-if model_choice == "Random Forest":
-    n_estimators = st.sidebar.slider("Number of Trees", 10, 200, 50, step=10)
-    max_depth = st.sidebar.slider("Max Depth", 1, 20, 5)
-elif model_choice == "ANN":
-    epochs = st.sidebar.slider("Number of Epochs", 10, 200, 50, step=10)
-    learning_rate = st.sidebar.slider("Learning Rate", 0.001, 0.1, 0.01, step=0.001)
-
-# Display dataset overview
+# =================== MAIN PAGE ===================
 st.markdown("## 📄 Dataset Overview")
 st.dataframe(df.head())
 
-with st.expander("ℹ️ Preprocessing Details"):
-    st.markdown("""
-    - Dropped irrelevant columns: `RowNumber`, `CustomerId`, `Surname`  
-    - Numeric missing values replaced with mean  
-    - Categorical missing values replaced with mode  
-    - Scaled numeric features using StandardScaler  
-    - OneHotEncoded categorical features: `Geography`, `Gender`
-    """)
+if st.button("Run Logistic Regression"):
+    st.markdown("## 🤖 Logistic Regression Training & Evaluation")
 
-st.info("""
-- Top correlated features with churn: CreditScore, Age, Geography, IsActiveMember  
-- ANN model converges well with standardized numeric features  
-- RandomForest highlights feature importance clearly
-""")
-
-# ===================== MODEL RUN SECTION =====================
-if st.button("Run Model"):
-    st.markdown("## 🤖 Model Training & Evaluation")
-
-    # Prepare data for modeling
+    # Prepare data
     numdata = ['CreditScore','Age','Tenure','Balance','NumOfProducts',
                'HasCrCard','IsActiveMember','EstimatedSalary']
     catdata = ['Geography','Gender']
-
     X_processed, y = encode_and_scale(df, numdata, catdata)
 
     from sklearn.model_selection import train_test_split
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, RocCurveDisplay, PrecisionRecallDisplay
+
     X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.2, random_state=42)
 
-    # ================= Logistic Regression =================
-    if model_choice == "Logistic Regression":
-        from sklearn.linear_model import LogisticRegression
-        from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
+    # Train Logistic Regression
+    model = LogisticRegression(max_iter=500)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)[:,1]
 
-        model = LogisticRegression(max_iter=500)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
+    # Accuracy & ROC-AUC
+    acc = accuracy_score(y_test, y_pred)
+    auc = roc_auc_score(y_test, y_proba)
+    st.success(f"Accuracy: {acc:.2f} | ROC-AUC: {auc:.2f}")
 
-        acc = accuracy_score(y_test, y_pred)
-        auc = roc_auc_score(y_test, model.predict_proba(X_test)[:,1])
-        cm = confusion_matrix(y_test, y_pred)
+    # =================== Confusion Matrix ===================
+    cm = confusion_matrix(y_test, y_pred)
+    st.markdown("### Confusion Matrix")
+    fig, ax = plt.subplots()
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, ax=ax)
+    ax.set_xlabel("Predicted")
+    ax.set_ylabel("Actual")
+    st.pyplot(fig)
+    st.markdown("**Interpretation**: Rows = Actual, Columns = Predicted. Blue diagonal cells show correctly predicted samples. Off-diagonal cells show misclassifications.")
 
-        st.success(f"Accuracy: {acc:.2f} | ROC-AUC: {auc:.2f}")
+    # =================== ROC Curve ===================
+    st.markdown("### ROC Curve")
+    fig, ax = plt.subplots()
+    RocCurveDisplay.from_predictions(y_test, y_proba, ax=ax)
+    st.pyplot(fig)
+    st.markdown("**Interpretation**: X-axis = False Positive Rate, Y-axis = True Positive Rate. A curve closer to top-left indicates better performance. Area under curve (AUC) is also shown above.")
 
-        # Confusion matrix heatmap
-        st.markdown("### Confusion Matrix")
-        fig, ax = plt.subplots()
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, ax=ax)
-        ax.set_xlabel("Predicted")
-        ax.set_ylabel("Actual")
-        st.pyplot(fig)
+    # =================== Predicted Probability Distribution ===================
+    st.markdown("### Predicted Probability Distribution")
+    fig, ax = plt.subplots()
+    sns.histplot(y_proba, bins=20, kde=True, color='skyblue', ax=ax)
+    ax.set_xlabel("Predicted Probability of Churn")
+    ax.set_ylabel("Number of Customers")
+    st.pyplot(fig)
+    st.markdown("**Interpretation**: Shows how confident the model is in predicting churn. Values near 0 = low chance of churn, near 1 = high chance of churn. Peaks show where most predictions lie.")
 
-    # ================= Random Forest =================
-    elif model_choice == "Random Forest":
-        from sklearn.ensemble import RandomForestClassifier
-        from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
-
-        model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-
-        acc = accuracy_score(y_test, y_pred)
-        auc = roc_auc_score(y_test, model.predict_proba(X_test)[:,1])
-        cm = confusion_matrix(y_test, y_pred)
-
-        st.success(f"Accuracy: {acc:.2f} | ROC-AUC: {auc:.2f}")
-
-        # Confusion matrix heatmap
-        st.markdown("### Confusion Matrix")
-        fig, ax = plt.subplots()
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, ax=ax)
-        ax.set_xlabel("Predicted")
-        ax.set_ylabel("Actual")
-        st.pyplot(fig)
-
-        # Feature importance
-        importances = model.feature_importances_
-        feature_names = numdata + list(model.feature_names_in_[-len(catdata):])
-        fi_df = pd.DataFrame({"Feature": feature_names, "Importance": importances}).sort_values(by="Importance", ascending=False)
-        st.markdown("### Feature Importance")
-        st.bar_chart(fi_df.set_index("Feature"))
-
-    # ================= ANN =================
-    elif model_choice == "ANN":
-        from sklearn.neural_network import MLPClassifier
-        from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
-
-        model = MLPClassifier(hidden_layer_sizes=(50,50), learning_rate_init=learning_rate,
-                              max_iter=epochs, random_state=42)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-
-        acc = accuracy_score(y_test, y_pred)
-        auc = roc_auc_score(y_test, model.predict_proba(X_test)[:,1])
-        cm = confusion_matrix(y_test, y_pred)
-
-        st.success(f"Accuracy: {acc:.2f} | ROC-AUC: {auc:.2f}")
-
-        # Confusion matrix heatmap
-        st.markdown("### Confusion Matrix")
-        fig, ax = plt.subplots()
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, ax=ax)
-        ax.set_xlabel("Predicted")
-        ax.set_ylabel("Actual")
-        st.pyplot(fig)
-
-    st.markdown("---")
-
-    # Top correlated features display
+    # =================== Top Correlated Features ===================
     corr = compute_correlation(X_processed, y)
     top_features = top_correlated_features(corr)
     st.markdown("### 🔝 Top Correlated Features with Target")
     st.write(top_features)
-
-# ===================== END MODEL RUN =====================
-
-if __name__ == "__main__":
-    st.write("App loaded successfully.")
+    st.markdown("**Interpretation**: Features at the top have the strongest correlation with customer churn (Exited).")
