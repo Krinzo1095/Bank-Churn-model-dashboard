@@ -10,6 +10,10 @@ This dashboard uses the Churn Modeling dataset.
 Adjust the model and hyperparameters below to see how the predictions and performance metrics change.
 """)
 
+# Load and clean data
+df = load_data()
+clean_and_impute_data(df)
+
 # Model selection
 model_choice = st.sidebar.selectbox(
     "Select ML Model",
@@ -28,7 +32,6 @@ st.markdown("## 📄 Dataset Overview")
 st.markdown("This dashboard uses the Churn Modeling dataset, containing customer features like Age, Geography, CreditScore, etc., and the target column `Exited` indicating churn.")
 st.dataframe(df.head())
 
-
 with st.expander("ℹ️ Preprocessing Details"):
     st.markdown("""
     - Dropped irrelevant columns: `RowNumber`, `CustomerId`, `Surname`  
@@ -38,9 +41,11 @@ with st.expander("ℹ️ Preprocessing Details"):
     - OneHotEncoded categorical features: `Geography`, `Gender`
     """)
 
-
 st.info("""
 - Top correlated features with churn: CreditScore, Age, Geography, IsActiveMember  
 - ANN model converges well with standardized numeric features  
 - RandomForest highlights feature importance clearly
 """)
+
+if __name__ == "__main__":
+    st.write("App loaded successfully.")
