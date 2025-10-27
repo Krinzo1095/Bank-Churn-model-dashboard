@@ -13,7 +13,7 @@ df = load_data()
 clean_and_impute_data(df)
 
 # ========== Sidebar ==========
-st.sidebar.markdown("# 📊 Churn Modeling Dashboard")
+st.sidebar.markdown("#  Churn Modeling Dashboard")
 st.sidebar.markdown("""
 This dashboard analyzes the **Churn Modeling dataset** using **Logistic Regression**  
 and visualizes relationships between features and customer churn.
@@ -29,13 +29,13 @@ and visualizes relationships between features and customer churn.
 """)
 
 # ========== Main Page ==========
-st.markdown("## 📄 Dataset Overview")
+st.markdown("##  Dataset Overview")
 st.dataframe(df.head())
 
 # ---------------------------------------------------------------------
 # 🧭 NEW PLOT 1: CHURN DISTRIBUTION
 # ---------------------------------------------------------------------
-st.markdown("### ⚖️ Churn Distribution")
+st.markdown("###  Churn Distribution")
 fig, ax = plt.subplots()
 sns.countplot(x='Exited', data=df, palette='Set2', ax=ax)
 ax.set_xticklabels(['Stayed (0)', 'Churned (1)'])
@@ -50,7 +50,7 @@ If churned customers are significantly fewer, the dataset is imbalanced — whic
 # ---------------------------------------------------------------------
 # 🧭 NEW PLOT 2: AGE DISTRIBUTION BY CHURN
 # ---------------------------------------------------------------------
-st.markdown("### 👥 Age Distribution by Churn")
+st.markdown("###  Age Distribution by Churn")
 fig, ax = plt.subplots()
 sns.kdeplot(x='Age', hue='Exited', data=df, fill=True, common_norm=False, palette='Set1', ax=ax)
 ax.set_xlabel("Age")
@@ -65,7 +65,7 @@ Peaks or separations between the curves indicate which age groups are more likel
 # ---------------------------------------------------------------------
 # 🧭 NEW PLOT 3: BALANCE VS SALARY SCATTER
 # ---------------------------------------------------------------------
-st.markdown("### 💰 Balance vs Estimated Salary (Colored by Churn)")
+st.markdown("###  Balance vs Estimated Salary (Colored by Churn)")
 fig, ax = plt.subplots()
 sns.scatterplot(x='Balance', y='EstimatedSalary', hue='Exited', data=df, palette='coolwarm', alpha=0.6, ax=ax)
 st.pyplot(fig)
@@ -79,7 +79,7 @@ Patterns or clusters show how salary and balance levels relate to churn.
 # ---------------------------------------------------------------------
 # 🧭 NEW PLOT 4: GEOGRAPHY VS CHURN
 # ---------------------------------------------------------------------
-st.markdown("### 🌍 Churn Rate by Geography")
+st.markdown("###  Churn Rate by Geography")
 fig, ax = plt.subplots()
 sns.barplot(x='Geography', y='Exited', data=df, estimator='mean', palette='viridis', ax=ax)
 ax.set_ylabel("Average Churn Rate")
@@ -93,7 +93,7 @@ Useful for identifying location-based churn trends.
 
 # ========== Logistic Regression Section ==========
 if st.button("Run Logistic Regression"):
-    st.markdown("## 🤖 Logistic Regression Training & Evaluation")
+    st.markdown("##  Logistic Regression Training & Evaluation")
 
     # Prepare data
     numdata = ['CreditScore','Age','Tenure','Balance','NumOfProducts',
@@ -156,7 +156,7 @@ if st.button("Run Logistic Regression"):
     # ---- Top Correlated Features ----
     corr = compute_correlation(X_processed, y)
     top_features = top_correlated_features(corr)
-    st.markdown("### 🔝 Top Correlated Features with Target")
+    st.markdown("###  Top Correlated Features with Target")
     st.write(top_features)
     st.markdown("""
     **Interpretation**:  
@@ -167,7 +167,7 @@ if st.button("Run Logistic Regression"):
     # ---------------------------------------------------------------------
     # 🧭 NEW PLOT 5: CORRELATION HEATMAP
     # ---------------------------------------------------------------------
-    st.markdown("### 🌡️ Correlation Heatmap (All Features)")
+    st.markdown("###  Correlation Heatmap (All Features)")
     fig, ax = plt.subplots(figsize=(10, 6))
     sns.heatmap(corr, cmap='coolwarm', center=0, annot=False, ax=ax)
     st.pyplot(fig)
