@@ -349,33 +349,7 @@ st.set_page_config(page_title="Churn Modeling Dashboard", layout="wide")
 sns.set_style("whitegrid")
 
 # ---------- FIXED STYLING ----------
-st.markdown("""
-<style>
-body, .stApp {
-    background-color: #f5f6fa;
-    color: #1e1e1e;
-    font-family: 'Segoe UI', sans-serif;
-}
-h1, h2, h3 {
-    color: #1e1e1e;
-    font-weight: 600;
-}
-div[data-testid="stMetricValue"] {
-    font-size: 2rem;
-    color: #000000; /* changed from blue to black */
-    font-weight: 600;
-}
-.block-container {
-    padding-top: 1rem;
-    padding-bottom: 0rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-}
-hr {
-    border: 1px solid #dcdcdc;
-}
-</style>
-""", unsafe_allow_html=True)
+
 
 # ---------- HEADER ----------
 st.markdown("""
@@ -390,7 +364,7 @@ height:6px;border-radius:3px;margin-bottom:15px;"></div>
 # ---------- LOAD DATA ----------
 st.markdown("### 📊 Dataset Overview")
 
-# Refresh button for dynamic reloading
+# Refresh button 
 if st.button("🔄"):
     df = load_data()
     clean_and_impute_data(df)
