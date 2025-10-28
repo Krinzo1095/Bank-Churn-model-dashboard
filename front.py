@@ -391,7 +391,7 @@ height:6px;border-radius:3px;margin-bottom:15px;"></div>
 st.markdown("### 📊 Dataset Overview")
 
 # Refresh button for dynamic reloading
-if st.button("🔄 Refresh Dataset"):
+if st.button("🔄"):
     df = load_data()
     clean_and_impute_data(df)
     st.success("✅ Dataset reloaded successfully! All visuals will use the latest data.")
