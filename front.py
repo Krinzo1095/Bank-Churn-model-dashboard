@@ -17,9 +17,6 @@ from sklearn.metrics import (
 st.set_page_config(page_title="Churn Modeling Dashboard", layout="wide")
 sns.set_style("whitegrid")
 
-# ---------- FIXED STYLING ----------
-
-
 # ---------- HEADER ----------
 st.markdown("""
 <h1 style='text-align:center;margin-bottom:0;'>Customer Churn Prediction Dashboard</h1>
